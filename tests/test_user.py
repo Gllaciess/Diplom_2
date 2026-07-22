@@ -14,7 +14,7 @@ class TestCreateUser:
         return requests.post(Urls.REGISTER, data=user)
 
     @allure.title('Создание уникального пользователя')
-    def test_create_unique_user(self):
+    def test_create_unique_user(self, delete_user_after_test):
         user = generate_random_user()
 
         with allure.step(f"Регистрация нового пользователя {user['email']}"):
@@ -22,6 +22,8 @@ class TestCreateUser:
 
         assert response.status_code == 200
         assert response.json()['success'] is True
+
+        delete_user_after_test(user['email'], user['password'])
 
     @allure.title('Создание пользователя, который уже зарегистрирован')
     def test_create_existing_user(self, create_user):
@@ -35,8 +37,7 @@ class TestCreateUser:
 
     @allure.title('Создание пользователя без обязательного поля')
     @pytest.mark.parametrize('field', ['email', 'password', 'name'])
-    def test_create_user_missing_field(self, field):
-        
+    def test_create_user_missing_field(self, field, delete_user_after_test):
         user = Users.get_valid_user()
         del user[field]
 
@@ -45,5 +46,8 @@ class TestCreateUser:
 
         assert response.status_code == 403
         assert response.json()['message'] == 'Email, password and name are required fields'
+
+        if response.status_code == 200 and 'email' in user and 'password' in user:
+            delete_user_after_test(user['email'], user['password'])
 
 

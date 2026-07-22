@@ -4,6 +4,7 @@ from helpers.helpers import generate_random_user
 from constants import Urls
 from data import Users
 
+
 @allure.feature('Логин пользователя')
 class TestLogin:
 
@@ -29,7 +30,6 @@ class TestLogin:
         user = create_user
 
         with allure.step(f"Попытка логина с неверным паролем для {user['email']}"):
-
             response = self.login_user(user['email'], Users.INVALID_PASSWORD)
 
         assert response.status_code == 401
