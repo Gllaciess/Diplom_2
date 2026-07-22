@@ -3,6 +3,7 @@ import pytest
 import requests
 from helpers.helpers import generate_random_user
 from constants import Urls
+from data import Users
 
 
 @allure.feature('Создание пользователя')
@@ -35,7 +36,8 @@ class TestCreateUser:
     @allure.title('Создание пользователя без обязательного поля')
     @pytest.mark.parametrize('field', ['email', 'password', 'name'])
     def test_create_user_missing_field(self, field):
-        user = generate_random_user()
+        
+        user = Users.get_valid_user()
         del user[field]
 
         with allure.step(f"Регистрация без поля {field}"):
