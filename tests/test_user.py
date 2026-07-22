@@ -8,11 +8,16 @@ from constants import Urls
 @allure.feature('Создание пользователя')
 class TestCreateUser:
 
+    @allure.step("Отправить запрос на регистрацию пользователя: {user}")
+    def register_user(self, user):
+        return requests.post(Urls.REGISTER, data=user)
+
     @allure.title('Создание уникального пользователя')
     def test_create_unique_user(self):
         user = generate_random_user()
 
-        response = requests.post(Urls.REGISTER, data=user)
+        with allure.step(f"Регистрация нового пользователя {user['email']}"):
+            response = self.register_user(user)
 
         assert response.status_code == 200
         assert response.json()['success'] is True
@@ -21,7 +26,8 @@ class TestCreateUser:
     def test_create_existing_user(self, create_user):
         user = create_user
 
-        response = requests.post(Urls.REGISTER, data=user)
+        with allure.step(f"Попытка повторной регистрации {user['email']}"):
+            response = self.register_user(user)
 
         assert response.status_code == 403
         assert response.json()['message'] == 'User already exists'
@@ -32,7 +38,8 @@ class TestCreateUser:
         user = generate_random_user()
         del user[field]
 
-        response = requests.post(Urls.REGISTER, data=user)
+        with allure.step(f"Регистрация без поля {field}"):
+            response = self.register_user(user)
 
         assert response.status_code == 403
         assert response.json()['message'] == 'Email, password and name are required fields'
